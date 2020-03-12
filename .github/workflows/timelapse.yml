@@ -11,7 +11,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - run: sudo apt install fonts-noto fonts-noto-color-emoji
+      - run: sudo apt-get install fonts-noto fonts-noto-color-emoji -y
       - run: yarn
       - run: node main.js
       - name: Some Git wizardry
