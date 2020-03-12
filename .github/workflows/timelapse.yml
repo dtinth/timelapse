@@ -13,7 +13,7 @@ jobs:
           node-version: 12.x
       - run: |
           node | curl -X POST -H 'Content-type: application/json' -d @- "${{ secrets.SLACK_WEBHOOK_URL }}" << 'EOF'
-          console.log({ text: "[timelapse] Hello world!" })
+          console.log(JSON.stringify({ text: "[timelapse] Hello world!" }))
           EOF
       - run: sudo apt-get install fonts-noto fonts-noto-color-emoji -y
       - run: yarn
