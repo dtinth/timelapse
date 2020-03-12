@@ -11,7 +11,9 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - run: sudo apt-get install fonts-noto fonts-noto-color-emoji -y
+      - name: Install emoji support
+        run: |
+          # sudo apt-get install fonts-noto-color-emoji -y
       - run: yarn
       - run: node main.js
       - name: Some Git wizardry
@@ -38,9 +40,13 @@ jobs:
                 text: `https://github.com/${{ github.repository }}/raw/${head}/${filename}`
               })
               console.log(input)
-              execSync('curl -X POST -H "Content-type: application/json" -d @- "${{ secrets.SLACK_WEBHOOK_URL }}" || echo "Exit $?"', {
-                input,
-                stdio: 'inherit'
-              })
+              try {
+                execSync('curl -X POST -H "Content-type: application/json" -d @- "${{ secrets.SLACK_WEBHOOK_URL }}"', {
+                  input,
+                  stdio: 'inherit'
+                })
+              } catch (error) {
+                console.error(error)
+              }
             }
           EOF
