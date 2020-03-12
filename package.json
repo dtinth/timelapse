@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "glob": "^7.1.6",
+    "imagemin": "^7.0.1",
+    "imagemin-pngquant": "^8.0.0",
     "jimp": "^0.9.5",
     "puppeteer": "^2.1.1",
     "tmp": "^0.1.0"

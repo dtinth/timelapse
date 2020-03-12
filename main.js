@@ -1,9 +1,10 @@
 const puppeteer = require('puppeteer')
 const jimp = require('jimp')
-const tmp = require('tmp')
 const fs = require('fs')
 const glob = require('glob')
 const path = require('path')
+const imagemin = require('imagemin')
+const imageminPngquant = require('imagemin-pngquant')
 
 async function main() {
   const browser = await puppeteer.launch({
@@ -35,6 +36,20 @@ function areImagesDifferent(a, b) {
   const diff = jimp.diff(a, b)
   const threshold = 0.001
   return diff.percent > threshold
+}
+
+/**
+ * @param {Buffer} buffer
+ */
+async function optimize(buffer) {
+  try {
+    buffer = await imagemin.buffer(buffer, {
+      plugins: [imageminPngquant.default({ quality: [0.6, 0.8] })],
+    })
+  } catch (error) {
+    console.log('Cannot optimize image', error)
+  }
+  return buffer
 }
 
 /**
@@ -75,6 +90,8 @@ async function runProject(browser, projectName) {
             break
           }
         }
+
+        screenshot = await optimize(screenshot)
 
         if (!fs.existsSync(target)) {
           console.log('Create: "%s"', target)
