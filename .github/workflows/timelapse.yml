@@ -1,6 +1,6 @@
 name: Timelapse
 on:
-  repository_dispatch: {}
+  push: {}
   schedule:
     - cron: '0 1 * * *'
 jobs:
@@ -18,4 +18,4 @@ jobs:
           export GIT_COMMITTER_NAME=Janitor
           export GIT_AUTHOR_NAME=Janitor
           export EMAIL=repository-janitor[bot]@users.noreply.github.com
-          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" master
+          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" "$GITHUB_REF"
