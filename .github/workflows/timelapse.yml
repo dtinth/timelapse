@@ -43,7 +43,7 @@ jobs:
               try {
                 execSync('curl -X POST -H "Content-type: application/json" -d @- "${{ secrets.SLACK_WEBHOOK_URL }}"', {
                   input,
-                  stdio: 'inherit'
+                  stdio: ['pipe', 'inherit', 'inherit']
                 })
               } catch (error) {
                 console.error(error)
