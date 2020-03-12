@@ -34,10 +34,12 @@ jobs:
             const head = String(execSync('git rev-parse HEAD')).trim()
             for (const filename of changed) {
               console.log(filename)
+              const input = JSON.stringify({
+                text: `https://github.com/${{ github.repository }}/raw/${head}/${filename}`
+              })
+              console.log(input)
               execSync('curl -X POST -H "Content-type: application/json" -d @- "${{ secrets.SLACK_WEBHOOK_URL }}" || echo "Exit $?"', {
-                input: JSON.stringify({
-                  text: `https://github.com/${{ github.repository }}/raw/${head}/${filename}`
-                }),
+                input,
                 stdio: 'inherit'
               })
             }
