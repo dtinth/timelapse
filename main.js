@@ -10,15 +10,18 @@ async function main() {
     args: ['--single-process'],
   })
   try {
-    for (const configFile of glob.sync('projects/*.config.js')) {
-      try {
-        const projectName = path.basename(configFile, '.config.js')
-        console.log(`# ${projectName}`)
-        const config = require(fs.realpathSync(configFile))
-        await takeScreenshot(browser, projectName, config)
-      } catch (error) {
-        console.error(error)
-        process.exitCode = 1
+    if (process.argv[2]) {
+      await runProject(browser, path.basename(process.argv[2], '.config.js'))
+    } else {
+      for (const configFile of glob.sync('projects/*.config.js')) {
+        try {
+          const projectName = path.basename(configFile, '.config.js')
+          console.log(`# ${projectName}`)
+          await runProject(browser, projectName)
+        } catch (error) {
+          console.error(error)
+          process.exitCode = 1
+        }
       }
     }
   } finally {
@@ -37,52 +40,57 @@ function areImagesDifferent(a, b) {
 /**
  * @param {import('puppeteer').Browser} browser
  * @param {string} projectName
- * @param {TimelapseProjectConfig} config
  * @return true if new images created
  */
-async function takeScreenshot(browser, projectName, config) {
+async function runProject(browser, projectName) {
+  const configFile = `projects/${projectName}.config.js`
+  /** @type {TimelapseProjectConfig} */
+  const config = require(fs.realpathSync(configFile))
   const page = await browser.newPage()
-  await page.setViewport({ width: 1280, height: 720 })
   try {
-    const target = `projects/${projectName}.png`
-    await config.run({ browser, page })
-    const getScreenshot = () =>
-      page.screenshot({ encoding: 'binary', type: 'png' })
+    await page.setViewport({ width: 1280, height: 720 })
+    await config.run({
+      browser,
+      page,
+      capture: async (page, screenshotName = '') => {
+        const suffix = `${screenshotName ? '_' : ''}${screenshotName}`
+        const target = `projects/${projectName}${suffix}.png`
+        const getScreenshot = () =>
+          page.screenshot({ encoding: 'binary', type: 'png' })
 
-    let screenshot = await getScreenshot()
-    let previousScreenshotImage = await jimp.read(screenshot)
-    let start = Date.now()
-    for (;;) {
-      await new Promise(r => setTimeout(r, 100))
-      screenshot = await getScreenshot()
-      const screenshotImage = await jimp.read(screenshot)
-      if (areImagesDifferent(previousScreenshotImage, screenshotImage)) {
-        previousScreenshotImage = screenshotImage
-      } else {
-        break
-      }
-      if (Date.now() >= start + 5e3) {
-        console.warn('Give up waiting for animations to finish')
-        break
-      }
-    }
+        let screenshot = await getScreenshot()
+        let previousScreenshotImage = await jimp.read(screenshot)
+        let start = Date.now()
+        for (;;) {
+          await new Promise(r => setTimeout(r, 100))
+          screenshot = await getScreenshot()
+          const screenshotImage = await jimp.read(screenshot)
+          if (areImagesDifferent(previousScreenshotImage, screenshotImage)) {
+            previousScreenshotImage = screenshotImage
+          } else {
+            break
+          }
+          if (Date.now() >= start + 5e3) {
+            console.warn('Give up waiting for animations to finish')
+            break
+          }
+        }
 
-    if (!fs.existsSync(target)) {
-      console.log('Create: "%s"', target)
-      fs.writeFileSync(target, screenshot)
-      return true
-    } else {
-      const existingImage = await jimp.read(target)
-      const latestImage = await jimp.read(screenshot)
-      if (areImagesDifferent(existingImage, latestImage)) {
-        fs.writeFileSync(target, screenshot)
-        console.log('Update: "%s"', target)
-        return false
-      } else {
-        console.log('Up-to-date: "%s"', target)
-        return true
-      }
-    }
+        if (!fs.existsSync(target)) {
+          console.log('Create: "%s"', target)
+          fs.writeFileSync(target, screenshot)
+        } else {
+          const existingImage = await jimp.read(target)
+          const latestImage = await jimp.read(screenshot)
+          if (areImagesDifferent(existingImage, latestImage)) {
+            fs.writeFileSync(target, screenshot)
+            console.log('Update: "%s"', target)
+          } else {
+            console.log('Up-to-date: "%s"', target)
+          }
+        }
+      },
+    })
   } finally {
     await page.close()
   }
