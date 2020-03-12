@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 1 * * *'
 jobs:
-  sync:
+  timelapse:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,7 +16,9 @@ jobs:
       - name: Some Git wizardry
         run: |
           git add -A
-          git add --all && git commit -m "📸 $(node -p 'new Date().toJSON()')" || echo "Nothing to commit"
+          git add --all \
+            && git commit -m "📸 $(node -p 'new Date().toJSON()') [$(node -p 'String(child_process.execSync("git diff --cached --name-only")).match(/\S+/g).map(x => path.basename(x, ".png")).join(", ")')]" \
+            || echo "Nothing to commit"
           git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" "$GITHUB_REF"
         env:
           GIT_COMMITTER_NAME: Janitor
