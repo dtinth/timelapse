@@ -1,0 +1,21 @@
+name: Timelapse
+on:
+  repository_dispatch: {}
+  schedule:
+    - cron: '0 1 * * *'
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - run: yarn
+      - run: node main.js
+      - name: Some Git wizardry
+        run: |
+          export GIT_COMMITTER_NAME=Janitor
+          export GIT_AUTHOR_NAME=Janitor
+          export EMAIL=repository-janitor[bot]@users.noreply.github.com
+          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" master
