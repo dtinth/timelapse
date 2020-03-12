@@ -11,6 +11,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12.x
+      - run: sudo apt install fonts-noto
       - run: yarn
       - run: node main.js
       - name: Some Git wizardry
