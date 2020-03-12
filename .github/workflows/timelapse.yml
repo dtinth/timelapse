@@ -13,7 +13,7 @@ jobs:
           node-version: 12.x
       - name: Install emoji support
         run: |
-          # sudo apt-get install fonts-noto-color-emoji -y
+          sudo apt-get install fonts-noto-color-emoji -y
       - run: yarn
       - run: node main.js
       - name: Some Git wizardry
@@ -32,7 +32,7 @@ jobs:
             const fs = require('fs')
             const { execSync } = require('child_process')
             const filelist = "/tmp/changes.filelist.txt"
-            const changed = ["projects/voice-recorder_initial.png"] || (fs.existsSync(filelist) && fs.readFileSync("/tmp/changes.filelist.txt", "utf-8").match(/\S+\.png/g)) || []
+            const changed = (fs.existsSync(filelist) && fs.readFileSync("/tmp/changes.filelist.txt", "utf-8").match(/\S+\.png/g)) || []
             const head = String(execSync('git rev-parse HEAD')).trim()
             for (const filename of changed) {
               console.log(filename)
