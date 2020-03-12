@@ -11,20 +11,34 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - run: |
-          (node | curl -X POST -H 'Content-type: application/json' -d @- "${{ secrets.SLACK_WEBHOOK_URL }}") << 'EOF'
-          console.log(JSON.stringify({ text: "[timelapse] Hello world!" }))
-          EOF
       - run: sudo apt-get install fonts-noto fonts-noto-color-emoji -y
       - run: yarn
       - run: node main.js
       - name: Some Git wizardry
         run: |
           git add --all \
-            && git commit -m "📸 $(node -p 'new Date().toJSON()') [$(node -p '(String(child_process.execSync("git diff --cached --name-only")).match(/\S+/g) || []).map(x => path.basename(x, ".png")).join(", ")')]" \
+            && (git diff --cached --name-only | tee /tmp/changes.filelist.txt) \
+            && git commit -m "📸 $(node -p 'new Date().toJSON()') [$(node -p '(fs.readFileSync("/tmp/changes.filelist.txt", "utf-8").match(/\S+/g) || []).map(x => path.basename(x, ".png")).join(", ")')]" \
             || echo "Nothing to commit"
           git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" "$GITHUB_REF"
         env:
           GIT_COMMITTER_NAME: Janitor
           GIT_AUTHOR_NAME: Janitor
           EMAIL: repository-janitor[bot]@users.noreply.github.com
+      - run: |
+          node << 'EOF'
+            const fs = require('fs')
+            const { execSync } = require('child_process')
+            const filelist = "/tmp/changes.filelist.txt"
+            const changed = ["projects/voice-recorder_initial.png"] || (fs.existsSync(filelist) && fs.readFileSync("/tmp/changes.filelist.txt", "utf-8").match(/\S+\.png/g)) || []
+            const head = String(execSync('git rev-parse HEAD')).trim()
+            for (const filename of changed) {
+              console.log(filename)
+              execSync('curl -X POST -H "Content-type: application/json" -d @- "${{ secrets.SLACK_WEBHOOK_URL }}" || echo "Exit $?"', {
+                input: JSON.stringify({
+                  text: `https://github.com/${{ github.repository }}/raw/${head}/${filename}`
+                }),
+                stdio: 'inherit'
+              })
+            }
+          EOF
