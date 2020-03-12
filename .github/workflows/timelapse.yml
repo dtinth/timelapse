@@ -39,10 +39,7 @@ jobs:
               const url = `https://github.com/${{ github.repository }}/raw/${head}/${filename}`
               const input = JSON.stringify({
                 text: `Updated ${filename}`,
-                blocks: [
-                  { type: 'section', text: { type: 'mrkdwn', text: `<${url}|${filename}>` } },
-                  { type: 'image', alt_text: filename, image_url: url },
-                ]
+                blocks: [{ type: 'image', alt_text: 'Screenshot', title: filename, image_url: url }]
               })
               console.log(input)
               try {
