@@ -15,7 +15,10 @@ jobs:
       - run: node main.js
       - name: Some Git wizardry
         run: |
-          export GIT_COMMITTER_NAME=Janitor
-          export GIT_AUTHOR_NAME=Janitor
-          export EMAIL=repository-janitor[bot]@users.noreply.github.com
+          git add -A
+          git add --all && git commit -m "📸 $(node -p 'new Date().toJSON()')" || echo "Nothing to commit"
           git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" "$GITHUB_REF"
+        env:
+          GIT_COMMITTER_NAME: Janitor
+          GIT_AUTHOR_NAME: Janitor
+          EMAIL: repository-janitor[bot]@users.noreply.github.com
