@@ -36,8 +36,13 @@ jobs:
             const head = String(execSync('git rev-parse HEAD')).trim()
             for (const filename of changed) {
               console.log(filename)
+              const url = `https://github.com/${{ github.repository }}/raw/${head}/${filename}`
               const input = JSON.stringify({
-                text: `https://github.com/${{ github.repository }}/raw/${head}/${filename}`
+                text: `Updated ${filename}`,
+                blocks: [
+                  { type: 'section', text: { type: 'mrkdwn', text: `<${url}|${filename}>` } },
+                  { type: 'image', alt_text: filename, image_url: url },
+                ]
               })
               console.log(input)
               try {
