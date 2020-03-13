@@ -24,9 +24,9 @@ jobs:
             || echo "Nothing to commit"
           git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" "$GITHUB_REF"
         env:
-          GIT_COMMITTER_NAME: Janitor
-          GIT_AUTHOR_NAME: Janitor
-          EMAIL: repository-janitor[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: dtinth-bot
+          GIT_AUTHOR_NAME: dtinth-bot
+          EMAIL: dtinth-bot@users.noreply.github.com
       - run: |
           node << 'EOF'
             const fs = require('fs')
