@@ -5,6 +5,7 @@ const glob = require('glob')
 const path = require('path')
 const imagemin = require('imagemin')
 const imageminPngquant = require('imagemin-pngquant')
+const mkdirp = require('mkdirp')
 
 async function main() {
   const browser = await puppeteer.launch({
@@ -69,7 +70,9 @@ async function runProject(browser, projectName) {
       page,
       capture: async (page, screenshotName = '') => {
         const suffix = `${screenshotName ? '_' : ''}${screenshotName}`
-        const target = `projects/${projectName}${suffix}.png`
+        const dir = process.env.GITHUB_ACTIONS ? 'projects' : 'projects-local'
+        mkdirp(dir)
+        const target = `${dir}/${projectName}${suffix}.png`
         const getScreenshot = () =>
           page.screenshot({ encoding: 'binary', type: 'png' })
 
@@ -77,7 +80,7 @@ async function runProject(browser, projectName) {
         let previousScreenshotImage = await jimp.read(screenshot)
         let start = Date.now()
         for (;;) {
-          await new Promise(r => setTimeout(r, 100))
+          await new Promise((r) => setTimeout(r, 100))
           screenshot = await getScreenshot()
           const screenshotImage = await jimp.read(screenshot)
           if (areImagesDifferent(previousScreenshotImage, screenshotImage)) {
@@ -113,7 +116,7 @@ async function runProject(browser, projectName) {
   }
 }
 
-process.on('unhandledRejection', up => {
+process.on('unhandledRejection', (up) => {
   throw up
 })
 
