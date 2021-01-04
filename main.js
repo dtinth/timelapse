@@ -6,6 +6,7 @@ const path = require('path')
 const imagemin = require('imagemin')
 const imageminPngquant = require('imagemin-pngquant')
 const mkdirp = require('mkdirp')
+const execa = require('execa')
 
 async function main() {
   const browser = await puppeteer.launch({
@@ -19,7 +20,11 @@ async function main() {
         try {
           const projectName = path.basename(configFile, '.config.js')
           console.log(`# ${projectName}`)
-          await runProject(browser, projectName)
+          const changes = await runProject(browser, projectName)
+          if (changes.length > 0 && process.env.CI) {
+            await execa('git', ['add', ...changes], { stdio: 'inherit' })
+            await execa('git', ['commit', '-m', `📸 ${new Date().toJSON()} [${projectName}]`], { stdio: 'inherit' })
+          }
         } catch (error) {
           console.error(error)
           process.exitCode = 1
@@ -56,13 +61,14 @@ async function optimize(buffer) {
 /**
  * @param {import('puppeteer').Browser} browser
  * @param {string} projectName
- * @return true if new images created
  */
 async function runProject(browser, projectName) {
   const configFile = `projects/${projectName}.config.js`
   /** @type {TimelapseProjectConfig} */
   const config = require(fs.realpathSync(configFile))
   const page = await browser.newPage()
+  /** @type {string[]} */
+  const changedFiles = []
   try {
     await page.setViewport({ width: 1280, height: 720 })
     await config.run({
@@ -99,12 +105,14 @@ async function runProject(browser, projectName) {
         if (!fs.existsSync(target)) {
           console.log('Create: "%s"', target)
           fs.writeFileSync(target, screenshot)
+          changedFiles.push(target)
         } else {
           const existingImage = await jimp.read(target)
           const latestImage = await jimp.read(screenshot)
           if (areImagesDifferent(existingImage, latestImage)) {
             fs.writeFileSync(target, screenshot)
             console.log('Update: "%s"', target)
+            changedFiles.push(target)
           } else {
             console.log('Up-to-date: "%s"', target)
           }
@@ -114,6 +122,7 @@ async function runProject(browser, projectName) {
   } finally {
     await page.close()
   }
+  return changedFiles
 }
 
 process.on('unhandledRejection', (up) => {

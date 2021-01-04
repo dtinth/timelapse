@@ -26,17 +26,16 @@ jobs:
           sudo apt-get install fonts-noto-color-emoji -y
       - run: yarn
       - run: node main.js
-      - name: Some Git wizardry
-        run: |
-          git add --all \
-            && (git diff --cached --name-only | tee /tmp/changes.filelist.txt) \
-            && git commit -m "📸 $(node -p 'new Date().toJSON()') [$(node -p '(fs.readFileSync("/tmp/changes.filelist.txt", "utf-8").match(/\S+/g) || []).map(x => path.basename(x, ".png")).join(", ")')]" \
-            || echo "Nothing to commit"
-          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" "$GITHUB_REF"
         env:
           GIT_COMMITTER_NAME: dtinth-bot
           GIT_AUTHOR_NAME: dtinth-bot
           EMAIL: dtinth-bot@users.noreply.github.com
+      - name: Save changed files
+        run: |
+          git diff --name-only origin/master | tee /tmp/changes.filelist.txt
+      - name: git push
+        run: |
+          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" "$GITHUB_REF"
       - run: |
           node << 'EOF'
             const fs = require('fs')
