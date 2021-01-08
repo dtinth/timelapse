@@ -6,5 +6,6 @@ interface TimelapseProjectConfig {
     browser: Browser
     page: Page
     capture: (page: Page, name?: string) => Promise<void>
+    css: (styles: string) => Promise<void>
   }) => Promise<void>
 }

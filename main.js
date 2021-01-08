@@ -23,7 +23,11 @@ async function main() {
           const changes = await runProject(browser, projectName)
           if (changes.length > 0 && process.env.CI) {
             await execa('git', ['add', ...changes], { stdio: 'inherit' })
-            await execa('git', ['commit', '-m', `📸 ${new Date().toJSON()} [${projectName}]`], { stdio: 'inherit' })
+            await execa(
+              'git',
+              ['commit', '-m', `📸 ${new Date().toJSON()} [${projectName}]`],
+              { stdio: 'inherit' },
+            )
           }
         } catch (error) {
           console.error(error)
@@ -117,6 +121,13 @@ async function runProject(browser, projectName) {
             console.log('Up-to-date: "%s"', target)
           }
         }
+      },
+      css: async (stylesheet) => {
+        await page.evaluate(async (stylesheet) => {
+          const style = document.createElement('style')
+          style.textContent = stylesheet
+          document.head.appendChild(style)
+        }, stylesheet)
       },
     })
   } finally {
