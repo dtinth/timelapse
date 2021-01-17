@@ -23,7 +23,7 @@ jobs:
           node-version: 12.x
       - name: Install emoji support
         run: |
-          sudo apt-get install fonts-noto-color-emoji -y
+          sudo apt-get install fonts-noto-color-emoji fonts-noto -y
       - run: yarn
       - run: node main.js
         env:
