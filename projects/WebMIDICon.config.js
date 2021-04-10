@@ -7,5 +7,7 @@ module.exports = /** @type {TimelapseProjectConfig} */ ({
     await capture(page, 'piano')
     await page.goto('https://webmidicon.web.app/#/drums')
     await capture(page, 'drums')
+    await page.goto('https://webmidicon.web.app/#/config')
+    await capture(page, 'config')
   },
 })
