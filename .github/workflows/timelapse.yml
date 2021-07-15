@@ -25,7 +25,9 @@ jobs:
         run: |
           sudo apt-get install fonts-noto-color-emoji fonts-noto -y
       - run: yarn
-      - run: node main.js
+      - run: node main capture-all
+      - run: node main update
+      - run: node main commit
         env:
           GIT_COMMITTER_NAME: dtinth-bot
           GIT_AUTHOR_NAME: dtinth-bot
