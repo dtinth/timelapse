@@ -261,14 +261,18 @@ async function runProject(browser, projectName, outputDir) {
         let screenshot = await getScreenshot()
         let previousScreenshotImage = await jimp.read(screenshot)
         let start = Date.now()
+        const MAX_HP = 5
+        let hp = MAX_HP
         for (;;) {
           await new Promise((r) => setTimeout(r, 100))
           screenshot = await getScreenshot()
           const screenshotImage = await jimp.read(screenshot)
           if (areImagesDifferent(previousScreenshotImage, screenshotImage)) {
             previousScreenshotImage = screenshotImage
+            hp = MAX_HP
           } else {
-            break
+            hp--
+            if (hp === 0) break
           }
           if (Date.now() >= start + 5e3) {
             console.warn('Give up waiting for animations to finish')
