@@ -42,6 +42,7 @@ function main() {
             `Unable to capture project ${args.project}[${args.n}] due to error:`,
             error,
           )
+          process.exitCode = 1
         } finally {
           await browser.close()
         }
