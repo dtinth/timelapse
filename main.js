@@ -54,7 +54,7 @@ function main() {
       {
         concurrency: {
           type: 'number',
-          default: 4,
+          default: 3,
           description: 'How many concurrent captures to use',
         },
       },
@@ -76,8 +76,10 @@ function main() {
               })
             let result = await capture()
             if (result.exitCode !== 0) {
-              // Retry one more time
               result = await capture()
+              if (result.exitCode !== 0) {
+                result = await capture()
+              }
             }
             done++
             console.log(`Finished ${projectName}[${n}] ${done}/${tasks.length}`)
