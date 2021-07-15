@@ -247,8 +247,6 @@ async function runProject(browser, projectName, outputDir) {
   /** @type {TimelapseProjectConfig} */
   const config = require(fs.realpathSync(configFile))
   const page = await browser.newPage()
-  /** @type {string[]} */
-  const changedFiles = []
   try {
     await page.setViewport({ width: 1280, height: 720 })
     await config.run({
@@ -285,7 +283,6 @@ async function runProject(browser, projectName, outputDir) {
 
         console.log('Save screenshot to "%s"', target)
         fs.writeFileSync(target, screenshot)
-        changedFiles.push(target)
       },
       css: async (stylesheet) => {
         await page.evaluate(async (stylesheet) => {
@@ -295,10 +292,11 @@ async function runProject(browser, projectName, outputDir) {
         }, stylesheet)
       },
     })
+  } catch (error) {
+    console.error(`Error while running ${projectName}:`, error)
   } finally {
     await page.close()
   }
-  return changedFiles
 }
 
 process.on('unhandledRejection', (up) => {
