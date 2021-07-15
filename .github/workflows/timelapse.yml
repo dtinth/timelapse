@@ -6,15 +6,7 @@ on:
 jobs:
   timelapse:
     runs-on: ubuntu-20.04
-    if: |
-      (github.event_name == 'schedule') ||
-      (github.event_name == 'push') ||
-      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.issue.number == 1 && github.event.issue.labels[0].name == 'trigger')
     steps:
-      - name: unlabel (if labeled)
-        run: |
-          curl -X DELETE "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/1/labels/trigger?access_token=${{ secrets.GITHUB_TOKEN }}"
-        if: github.event_name == 'issues'
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
