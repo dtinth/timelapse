@@ -31,7 +31,7 @@ function main() {
       },
       async (args) => {
         const browser = await puppeteer.launch({
-          args: ['--single-process'],
+          args: ['--single-process', '--font-render-hinting=none'],
         })
         try {
           const projectName = args.project
