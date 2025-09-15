@@ -1,0 +1,7 @@
+services:
+  pptraas:
+    image: ghcr.io/dtinth/pptraas:latest
+    environment:
+      API_KEY: local
+    ports:
+      - 20279:20279

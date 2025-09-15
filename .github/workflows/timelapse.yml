@@ -7,14 +7,14 @@ jobs:
   timelapse:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v1
         with:
-          node-version: 12.x
+          node-version: 22.x
       - name: Install emoji support
         run: |
           sudo apt-get install fonts-noto-color-emoji fonts-noto -y
-      - run: yarn
+      - run: yarn --frozen-lockfile
       - run: node main capture-all
       - run: node main update
       - run: node main commit
